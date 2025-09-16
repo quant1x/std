@@ -2,15 +2,19 @@ package gls
 
 import "sync"
 
-type globalMapType map[int64]map[interface{}]interface{}
+type globalMapType map[int64]map[any]any
 
-const shardsCount = 16
+const (
+	shardsCount = 16
+)
 
-var globalLocks []*sync.RWMutex
-var globalMaps []globalMapType
+var (
+	globalLocks []*sync.RWMutex
+	globalMaps  []globalMapType
+)
 
 type copiable interface {
-	Copy() interface{}
+	Copy() any
 }
 
 func init() {
@@ -23,7 +27,7 @@ func init() {
 }
 
 // ResetGls reset the goroutine local storage for specified goroutine
-func ResetGls(goid int64, initialValue map[interface{}]interface{}) {
+func ResetGls(goid int64, initialValue map[any]any) {
 	shardIndex := goid % shardsCount
 	lock := globalLocks[shardIndex]
 	lock.Lock()
@@ -42,7 +46,7 @@ func DeleteGls(goid int64) {
 
 // GetGls get goroutine local storage for specified goroutine
 // if the goroutine did not set gls, it will return nil
-func GetGls(goid int64) map[interface{}]interface{} {
+func GetGls(goid int64) map[any]any {
 	shardIndex := goid % shardsCount
 	lock := globalLocks[shardIndex]
 	lock.RLock()
@@ -62,7 +66,7 @@ func WithGls(f func()) func() {
 	parentGls := GetGls(GoID())
 	// parentGls can not be used in other goroutine, otherwise not thread safe
 	// make a deep for child goroutine
-	childGls := map[interface{}]interface{}{}
+	childGls := map[any]any{}
 	for k, v := range parentGls {
 		asCopiable, ok := v.(copiable)
 		if ok {
@@ -84,14 +88,14 @@ func WithEmptyGls(f func()) func() {
 	// do not inherit from parent gls
 	return func() {
 		goid := GoID()
-		ResetGls(goid, make(map[interface{}]interface{}))
+		ResetGls(goid, make(map[any]any))
 		defer DeleteGls(goid)
 		f()
 	}
 }
 
 // Get key from goroutine local storage
-func Get(key interface{}) interface{} {
+func Get(key any) any {
 	glsMap := GetGls(GoID())
 	if glsMap == nil {
 		return nil
@@ -100,10 +104,10 @@ func Get(key interface{}) interface{} {
 }
 
 // Set key and element to goroutine local storage
-func Set(key interface{}, value interface{}) {
+func Set(key any, value any) {
 	goid := GoID()
 	if !IsGlsEnabled(goid) {
-		ResetGls(goid, make(map[interface{}]interface{}))
+		ResetGls(goid, make(map[any]any))
 	}
 	glsMap := GetGls(goid)
 	if glsMap == nil {
@@ -112,7 +116,7 @@ func Set(key interface{}, value interface{}) {
 	glsMap[key] = value
 }
 
-func Remove(key interface{}) {
+func Remove(key any) {
 	goid := GoID()
 	glsMap := GetGls(goid)
 	if glsMap != nil {
