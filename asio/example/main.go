@@ -43,7 +43,7 @@ func client() {
 		//连接最大空闲时间，超过该时间的连接 将会关闭，可避免空闲时连接EOF，自动失效的问题
 		IdleTimeout: 15 * time.Second,
 	}
-	p, err := asio.NewChannelPool(poolConfig)
+	p, err := asio.NewConnectionPool(poolConfig)
 	if err != nil {
 		fmt.Println("err=", err)
 	}
