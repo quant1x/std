@@ -88,6 +88,11 @@ func NewConnectionPool(poolConfig *Config) (ConnectionPool, error) {
 	return c, nil
 }
 
+// Len 连接池中已有的连接
+func (c *channelPool) Len() int {
+	return len(c.getConns())
+}
+
 // getConns 获取所有连接
 func (c *channelPool) getConns() chan *idleConn {
 	c.mu.Lock()
@@ -272,9 +277,4 @@ func (c *channelPool) CloseAll() {
 			return // 通道为空时退出
 		}
 	}
-}
-
-// Len 连接池中已有的连接
-func (c *channelPool) Len() int {
-	return len(c.getConns())
 }
