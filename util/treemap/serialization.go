@@ -1,0 +1,24 @@
+// Copyright (c) 2015, Emir Pasic. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package treemap
+
+import (
+	"gitee.com/quant1x/std/util/internal"
+)
+
+func assertSerializationImplementation() {
+	var _ internal.JSONSerializer = (*Map)(nil)
+	var _ internal.JSONDeserializer = (*Map)(nil)
+}
+
+// ToJSON outputs the JSON representation of the map.
+func (m *Map) ToJSON() ([]byte, error) {
+	return m.tree.ToJSON()
+}
+
+// FromJSON populates the map from the input JSON representation.
+func (m *Map) FromJSON(data []byte) error {
+	return m.tree.FromJSON(data)
+}
