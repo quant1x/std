@@ -13,16 +13,16 @@ var (
 
 // ConnectionPool 基本方法
 type ConnectionPool interface {
-	// Get 获取一个连接
-	Get() (any, error)
-	// Put 归还一个连接
-	Put(any) error
-	// Close 关闭连接
-	Close(any) error
+	// Acquire 获取一个连接
+	Acquire() (any, error)
+	// Release 归还一个连接
+	Release(any) error
+	// CloseConn 关闭连接
+	CloseConn(any) error
 	// CloseAll 关闭全部连接
 	CloseAll()
-	// Release 释放连接池
-	Release()
+	// Close 关闭连接池, 释放所有连接
+	Close() error
 	// Len 连接数
 	Len() int
 }

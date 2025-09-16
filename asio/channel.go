@@ -40,9 +40,9 @@ type channelPool struct {
 	maxActive    int                 // 最大活跃数
 	openingConns int                 // 打开连接数
 	connReqs     []chan connReq      // 池满后请求新连接的队列
-	factory      func() (any, error) // 新连接工厂
-	close        func(any) error     // 关闭
-	ping         func(any) error     // ping
+	cbFactory    func() (any, error) // 新连接工厂
+	cbClose      func(any) error     // 关闭
+	cbPing       func(any) error     // ping
 }
 
 type idleConn struct {
@@ -65,21 +65,21 @@ func NewConnectionPool(poolConfig *Config) (ConnectionPool, error) {
 
 	c := &channelPool{
 		conns:        make(chan *idleConn, poolConfig.MaxIdle),
-		factory:      poolConfig.Factory,
-		close:        poolConfig.Close,
+		cbFactory:    poolConfig.Factory,
+		cbClose:      poolConfig.Close,
 		idleTimeout:  poolConfig.IdleTimeout,
 		maxActive:    poolConfig.MaxCap,
 		openingConns: poolConfig.InitialCap,
 	}
 
 	if poolConfig.Ping != nil {
-		c.ping = poolConfig.Ping
+		c.cbPing = poolConfig.Ping
 	}
 
 	for i := 0; i < poolConfig.InitialCap; i++ {
-		conn, err := c.factory()
+		conn, err := c.cbFactory()
 		if err != nil {
-			c.Release()
+			_ = c.Close()
 			return nil, fmt.Errorf("factory is not able to fill the pool: %s", err)
 		}
 		c.conns <- &idleConn{conn: conn, t: time.Now()}
@@ -101,8 +101,8 @@ func (c *channelPool) getConns() chan *idleConn {
 	return conns
 }
 
-// Get 从pool中取一个连接
-func (c *channelPool) Get() (any, error) {
+// Acquire 从pool中取一个连接
+func (c *channelPool) Acquire() (any, error) {
 	conns := c.getConns()
 	if conns == nil {
 		return nil, ErrClosed
@@ -118,15 +118,15 @@ func (c *channelPool) Get() (any, error) {
 				if wrapConn.t.Add(timeout).Before(time.Now()) {
 					logger.Warnf("空闲超时, 关闭连接.")
 					//丢弃并关闭该连接
-					_ = c.Close(wrapConn.conn)
+					_ = c.CloseConn(wrapConn.conn)
 					continue
 				}
 			}
 			//判断是否失效，失效则丢弃，如果用户没有设定 ping 方法，就不检查
-			if c.ping != nil {
+			if c.cbPing != nil {
 				if err := c.Ping(wrapConn.conn); err != nil {
 					logger.Warnf("ping失败, 关闭连接.")
-					_ = c.Close(wrapConn.conn)
+					_ = c.CloseConn(wrapConn.conn)
 					continue
 				}
 			}
@@ -151,7 +151,7 @@ func (c *channelPool) Get() (any, error) {
 						//丢弃并关闭该连接
 						//logger.Warnf("default-1: 2-1-1")
 						logger.Warnf("超时, 关闭连接.")
-						_ = c.Close(ret.idleConn.conn)
+						_ = c.CloseConn(ret.idleConn.conn)
 						continue
 					}
 					//logger.Warnf("default-1: 2-2")
@@ -160,13 +160,13 @@ func (c *channelPool) Get() (any, error) {
 				return ret.idleConn.conn, nil
 			}
 			//logger.Warnf("default-2")
-			if c.factory == nil {
+			if c.cbFactory == nil {
 				//logger.Warnf("default-2: 1")
 				c.mu.Unlock()
 				return nil, ErrClosed
 			}
 			//logger.Warnf("default-3")
-			conn, err := c.factory()
+			conn, err := c.cbFactory()
 			if err != nil {
 				//logger.Warnf("default-3: 1")
 				c.mu.Unlock()
@@ -180,8 +180,8 @@ func (c *channelPool) Get() (any, error) {
 	}
 }
 
-// Put 将连接放回pool中
-func (c *channelPool) Put(conn any) error {
+// Release 将连接放回pool中
+func (c *channelPool) Release(conn any) error {
 	if conn == nil {
 		return ErrIsNil
 	}
@@ -191,7 +191,7 @@ func (c *channelPool) Put(conn any) error {
 	if c.conns == nil {
 		c.mu.Unlock()
 		logger.Warnf("队列无效, 关闭连接.")
-		return c.Close(conn)
+		return c.CloseConn(conn)
 	}
 
 	if l := len(c.connReqs); l > 0 {
@@ -212,23 +212,23 @@ func (c *channelPool) Put(conn any) error {
 			c.mu.Unlock()
 			//连接池已满，直接关闭该连接
 			logger.Warnf("返还连接, 连接池已满, 关闭连接.")
-			return c.Close(conn)
+			return c.CloseConn(conn)
 		}
 	}
 }
 
-// Close 关闭单条连接
-func (c *channelPool) Close(conn any) error {
+// CloseConn 关闭单条连接
+func (c *channelPool) CloseConn(conn any) error {
 	if conn == nil {
 		return ErrIsNil
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.close == nil {
+	if c.cbClose == nil {
 		return nil
 	}
 	c.openingConns--
-	return c.close(conn)
+	return c.cbClose(conn)
 }
 
 // Ping 检查单条连接是否有效
@@ -236,42 +236,43 @@ func (c *channelPool) Ping(conn any) error {
 	if conn == nil {
 		return ErrIsNil
 	}
-	return c.ping(conn)
+	return c.cbPing(conn)
 }
 
-// Release 释放连接池中所有连接
-func (c *channelPool) Release() {
+// Close 释放连接池中所有连接
+func (c *channelPool) Close() error {
 	c.mu.Lock()
 	conns := c.conns
 	c.conns = nil
-	c.factory = nil
-	c.ping = nil
-	closeFun := c.close
-	c.close = nil
+	c.cbFactory = nil
+	c.cbPing = nil
+	closeFun := c.cbClose
+	c.cbClose = nil
 	c.mu.Unlock()
 
 	if conns == nil {
-		return
+		return nil
 	}
 
 	close(conns)
 	for wrapConn := range conns {
 		_ = closeFun(wrapConn.conn)
 	}
+	return nil
 }
 
 // CloseAll 仅关闭连接池中所有连接
 func (c *channelPool) CloseAll() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.conns == nil || c.close == nil {
+	if c.conns == nil || c.cbClose == nil {
 		return
 	}
 	// 关闭所有连接并清空通道
 	for {
 		select {
 		case wrapConn := <-c.conns:
-			_ = c.close(wrapConn.conn)
+			_ = c.cbClose(wrapConn.conn)
 			c.openingConns--
 		default:
 			return // 通道为空时退出

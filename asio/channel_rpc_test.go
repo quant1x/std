@@ -36,38 +36,38 @@ func init() {
 
 func TestNew(t *testing.T) {
 	p, err := newChannelPool()
-	defer p.Release()
+	defer p.Close()
 	if err != nil {
 		t.Errorf("New error: %s", err)
 	}
 }
 func TestPool_Get_Impl(t *testing.T) {
 	p, _ := newChannelPool()
-	defer p.Release()
+	defer p.Close()
 
-	conn, err := p.Get()
+	conn, err := p.Acquire()
 	if err != nil {
-		t.Errorf("Get error: %s", err)
+		t.Errorf("Acquire error: %s", err)
 	}
 	_, ok := conn.(*rpc.Client)
 	if !ok {
 		t.Errorf("Conn is not of type poolConn")
 	}
-	p.Put(conn)
+	p.Release(conn)
 }
 
 func TestPool_Get(t *testing.T) {
 	p, _ := newChannelPool()
-	defer p.Release()
+	defer p.Close()
 
-	_, err := p.Get()
+	_, err := p.Acquire()
 	if err != nil {
-		t.Errorf("Get error: %s", err)
+		t.Errorf("Acquire error: %s", err)
 	}
 
 	// after one get, current capacity should be lowered by one.
 	if p.Len() != (InitialCap - 1) {
-		t.Errorf("Get error. Expecting %d, got %d",
+		t.Errorf("Acquire error. Expecting %d, got %d",
 			(InitialCap - 1), p.Len())
 	}
 
@@ -77,22 +77,22 @@ func TestPool_Get(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, err := p.Get()
+			_, err := p.Acquire()
 			if err != nil {
-				t.Errorf("Get error: %s", err)
+				t.Errorf("Acquire error: %s", err)
 			}
 		}()
 	}
 	wg.Wait()
 
 	if p.Len() != 0 {
-		t.Errorf("Get error. Expecting %d, got %d",
+		t.Errorf("Acquire error. Expecting %d, got %d",
 			(InitialCap - 1), p.Len())
 	}
 
-	_, err = p.Get()
+	_, err = p.Acquire()
 	if err != ErrMaxActiveConnReached {
-		t.Errorf("Get error: %s", err)
+		t.Errorf("Acquire error: %s", err)
 	}
 
 }
@@ -104,32 +104,32 @@ func TestPool_Put(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer p.Release()
+	defer p.Close()
 
 	// get/create from the pool
 	conns := make([]interface{}, MaximumCap)
 	for i := 0; i < MaximumCap; i++ {
-		conn, _ := p.Get()
+		conn, _ := p.Acquire()
 		conns[i] = conn
 	}
 
 	// now put them all back
 	for _, conn := range conns {
-		p.Put(conn)
+		_ = p.Release(conn)
 	}
 
 	if p.Len() != MaxIdleCap {
-		t.Errorf("Put error len. Expecting %d, got %d",
+		t.Errorf("Release error len. Expecting %d, got %d",
 			1, p.Len())
 	}
 
-	p.Release() // close pool
+	_ = p.Close() // close pool
 
 }
 
 func TestPool_UsedCapacity(t *testing.T) {
 	p, _ := newChannelPool()
-	defer p.Release()
+	defer p.Close()
 
 	if p.Len() != InitialCap {
 		t.Errorf("InitialCap error. Expecting %d, got %d",
@@ -141,7 +141,7 @@ func TestPool_Close(t *testing.T) {
 	p, _ := newChannelPool()
 
 	// now close it and test all cases we are expecting.
-	p.Release()
+	p.Close()
 
 	c := p.(*channelPool)
 
@@ -149,11 +149,11 @@ func TestPool_Close(t *testing.T) {
 		t.Errorf("Close error, conns channel should be nil")
 	}
 
-	if c.factory != nil {
+	if c.cbFactory != nil {
 		t.Errorf("Close error, factory should be nil")
 	}
 
-	_, err := p.Get()
+	_, err := p.Acquire()
 	if err == nil {
 		t.Errorf("Close error, get conn should return an error")
 	}
@@ -168,12 +168,12 @@ func TestPoolConcurrent(t *testing.T) {
 	pipe := make(chan interface{}, 0)
 
 	go func() {
-		p.Release()
+		p.Close()
 	}()
 
 	for i := 0; i < MaximumCap; i++ {
 		go func() {
-			conn, _ := p.Get()
+			conn, _ := p.Acquire()
 
 			pipe <- conn
 		}()
@@ -183,7 +183,7 @@ func TestPoolConcurrent(t *testing.T) {
 			if conn == nil {
 				return
 			}
-			p.Put(conn)
+			p.Release(conn)
 		}()
 	}
 }
@@ -191,7 +191,7 @@ func TestPoolConcurrent(t *testing.T) {
 func TestPoolWriteRead(t *testing.T) {
 	//p, _ := NewChannelPool(0, 30, factory)
 	p, _ := newChannelPool()
-	conn, _ := p.Get()
+	conn, _ := p.Acquire()
 	cli := conn.(*rpc.Client)
 	var resp int
 	err := cli.Call("Arith.Multiply", Args{1, 2}, &resp)
@@ -213,9 +213,9 @@ func TestPoolConcurrent2(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			wg.Add(1)
 			go func(i int) {
-				conn, _ := p.Get()
+				conn, _ := p.Acquire()
 				time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
-				p.Close(conn)
+				p.CloseConn(conn)
 				wg.Done()
 			}(i)
 		}
@@ -224,9 +224,9 @@ func TestPoolConcurrent2(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func(i int) {
-			conn, _ := p.Get()
+			conn, _ := p.Acquire()
 			time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
-			p.Close(conn)
+			p.CloseConn(conn)
 			wg.Done()
 		}(i)
 	}
@@ -246,7 +246,7 @@ func TestPoolConcurrent2(t *testing.T) {
 //		wg.Done()
 //	}()
 //
-//	if conn, err := p.Get(); err == nil {
+//	if conn, err := p.Acquire(); err == nil {
 //		conn.Close()
 //	}
 //

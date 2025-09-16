@@ -31,7 +31,7 @@ func client() {
 	factory := func() (interface{}, error) { return net.Dial("tcp", addr) }
 
 	//close 关闭连接的方法
-	close := func(v interface{}) error { return v.(net.Conn).Close() }
+	close_ := func(v interface{}) error { return v.(net.Conn).Close() }
 
 	//创建一个连接池： 初始化2，最大连接5，空闲连接数是4
 	poolConfig := &asio.Config{
@@ -39,7 +39,7 @@ func client() {
 		MaxIdle:    4,
 		MaxCap:     5,
 		Factory:    factory,
-		Close:      close,
+		Close:      close_,
 		//连接最大空闲时间，超过该时间的连接 将会关闭，可避免空闲时连接EOF，自动失效的问题
 		IdleTimeout: 15 * time.Second,
 	}
@@ -49,13 +49,13 @@ func client() {
 	}
 
 	//从连接池中取得一个连接
-	v, err := p.Get()
+	v, err := p.Acquire()
 
 	//do something
 	//conn=v.(net.Conn)
 
 	//将连接放回连接池中
-	p.Put(v)
+	p.Release(v)
 
 	//释放连接池中的所有连接
 	//p.Release()
