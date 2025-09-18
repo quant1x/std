@@ -10,26 +10,26 @@ type Pool[E any] struct {
 }
 
 // 初始化sync.Pool.New
-func (this *Pool[E]) init() {
-	this.pool = sync.Pool{New: func() any {
+func (p *Pool[E]) init() {
+	p.pool = sync.Pool{New: func() any {
 		var e E
 		return &e
 	}}
 }
 
 // Acquire 申请内存
-func (this *Pool[E]) Acquire() *E {
-	this.once.Do(this.init)
-	obj := this.pool.Get().(*E)
-	*obj = this.zero
+func (p *Pool[E]) Acquire() *E {
+	p.once.Do(p.init)
+	obj := p.pool.Get().(*E)
+	*obj = p.zero
 	return obj
 }
 
 // Release 释放内存
-func (this *Pool[E]) Release(obj *E) {
-	this.once.Do(this.init)
+func (p *Pool[E]) Release(obj *E) {
+	p.once.Do(p.init)
 	if obj == nil {
 		return
 	}
-	this.pool.Put(obj)
+	p.pool.Put(obj)
 }
