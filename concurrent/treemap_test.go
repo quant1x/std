@@ -2,6 +2,7 @@ package concurrent
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"testing"
 )
@@ -30,6 +31,14 @@ func BenchmarkTreeMapWrite(b *testing.B) {
 }
 
 func BenchmarkTreeMapRead(b *testing.B) {
+	testTreemap := NewTreeMap[string, int]()
+	testCount := 10000
+	for i := 0; i < testCount; i++ {
+		key := strconv.Itoa(i)
+		value := rand.Int()
+		testTreemap.Put(key, value)
+	}
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := strconv.Itoa(i)
 		_, _ = testTreemap.Get(key)
