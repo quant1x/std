@@ -14,7 +14,7 @@ import (
 
 	"gitee.com/quant1x/std/api"
 	"gitee.com/quant1x/std/cache"
-	"gitee.com/quant1x/std/mdc"
+	"gitee.com/quant1x/std/logger/mdc"
 	"gitee.com/quant1x/std/signal"
 )
 

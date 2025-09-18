@@ -8,8 +8,8 @@ import (
 
 	"gitee.com/quant1x/pkg/uuid"
 	"gitee.com/quant1x/std/api"
-	"gitee.com/quant1x/std/gls"
-	"gitee.com/quant1x/std/mdc"
+	gls2 "gitee.com/quant1x/std/logger/gls"
+	"gitee.com/quant1x/std/logger/mdc"
 )
 
 func TestGoId(t *testing.T) {
@@ -22,7 +22,7 @@ func TestGoId(t *testing.T) {
 func TestLogger(t *testing.T) {
 	InitLogger("/opt/logs/test")
 	u1 := uuid.NewV4()
-	defer gls.DeleteGls(gls.GoID())
+	defer gls2.DeleteGls(gls2.GoID())
 	mdc.Set(mdc.APP_TRACEID, u1.String())
 	//logger := api.GetLogger("test1")
 	//SetConsole()

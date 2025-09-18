@@ -2,7 +2,7 @@ package mdc
 
 import (
 	"gitee.com/quant1x/pkg/uuid"
-	"gitee.com/quant1x/std/gls"
+	"gitee.com/quant1x/std/logger/gls"
 )
 
 const (
