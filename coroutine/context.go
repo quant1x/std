@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"gitee.com/quant1x/std/logger"
-	"gitee.com/quant1x/std/signal"
+	"gitee.com/quant1x/std/runtime"
 )
 
 var (
@@ -41,7 +41,7 @@ func GetContextWithCancel() (context.Context, context.CancelFunc) {
 // WaitForShutdown 阻塞等待关闭信号
 func WaitForShutdown() {
 	globalOnce.Do(initContext)
-	interrupt := signal.Notify()
+	interrupt := runtime.Notify()
 	select {
 	case <-globalContext.Done():
 		logger.Infof("application shutdown...")

@@ -1,6 +1,6 @@
 //go:build windows
 
-package signal
+package runtime
 
 import (
 	"os"

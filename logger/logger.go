@@ -15,7 +15,7 @@ import (
 	"gitee.com/quant1x/std/api"
 	"gitee.com/quant1x/std/cache"
 	"gitee.com/quant1x/std/logger/mdc"
-	"gitee.com/quant1x/std/signal"
+	runtime2 "gitee.com/quant1x/std/runtime"
 )
 
 const (
@@ -65,7 +65,7 @@ func init() {
 	go flushLog(true)
 
 	// 创建监听退出chan
-	sigs := signal.Notify()
+	sigs := runtime2.Notify()
 
 	_, ctxCancel = context.WithCancel(context.Background())
 
