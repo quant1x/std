@@ -1,124 +1,224 @@
 package timestamp
 
 import (
-	"fmt"
 	"testing"
 	"time"
-
-	"gitee.com/quant1x/std/api"
 )
 
-func TestTimePrivate(t *testing.T) {
-	v := unixToInternal
-	fmt.Println(v)
+func TestTimestampCompatLayer(t *testing.T) {
+	// 测试基本创建和转换
+	t.Run("BasicCreationAndConversion", func(t *testing.T) {
+		// 从毫秒数创建
+		ts := NewTimestamp(1640995200000)
+		if ts.Value() != 1640995200000 {
+			t.Errorf("Expected value 1640995200000, got %d", ts.Value())
+		}
+
+		// 转换为Go原生Timestamp
+		goTs := ts.AsTimestamp()
+		if int64(goTs) != 1640995200000 {
+			t.Errorf("Conversion to Go timestamp failed: expected 1640995200000, got %d", int64(goTs))
+		}
+
+		// 从Go原生Timestamp创建
+		cppTs := FromTimestamp(goTs)
+		if cppTs.Value() != 1640995200000 {
+			t.Errorf("Creation from Go timestamp failed: expected 1640995200000, got %d", cppTs.Value())
+		}
+	})
+
+	// 测试与Go原生实现的一致性
+	t.Run("ConsistencyWithGoImplementation", func(t *testing.T) {
+		// 使用相同的毫秒数创建
+		ms := int64(1640995200000)
+		cppTs := NewTimestamp(ms)
+		goTs := V1Timestamp(ms)
+
+		// 比较时间转换结果
+		cppTime := cppTs.ToTime()
+		goTime := Time(int64(goTs))
+
+		if !cppTime.Equal(goTime) {
+			t.Errorf("Time conversion inconsistent: cpp=%v, go=%v", cppTime, goTime)
+		}
+	})
+
+	// 测试C++风格的API
+	t.Run("StyleAPI", func(t *testing.T) {
+		ts := NewTimestampFromDate(2022, 1, 1, 15, 30, 45, 123)
+
+		// 测试格式化
+		dateStr := ts.OnlyDate()
+		if dateStr != "2022-01-01" {
+			t.Errorf("Expected date '2022-01-01', got '%s'", dateStr)
+		}
+
+		timeStr := ts.OnlyTime()
+		if timeStr != "15:30:45" {
+			t.Errorf("Expected time '15:30:45', got '%s'", timeStr)
+		}
+
+		// 测试YYYYMMDD
+		yyyymmdd := ts.YYYYMMDD()
+		if yyyymmdd != 20220101 {
+			t.Errorf("Expected YYYYMMDD 20220101, got %d", yyyymmdd)
+		}
+	})
+
+	// 测试时间操作
+	t.Run("TimeOperations", func(t *testing.T) {
+		ts := NewTimestampFromDate(2022, 1, 1, 15, 30, 45, 123)
+
+		// 测试StartOfDay
+		startOfDay := ts.StartOfDay()
+		startTime := startOfDay.ToTime()
+		if startTime.Hour() != 0 || startTime.Minute() != 0 || startTime.Second() != 0 {
+			t.Errorf("StartOfDay should be 00:00:00, got %02d:%02d:%02d",
+				startTime.Hour(), startTime.Minute(), startTime.Second())
+		}
+
+		// 测试Today
+		today9AM := ts.Today(9, 0, 0, 0)
+		today9AMTime := today9AM.ToTime()
+		if today9AMTime.Hour() != 9 {
+			t.Errorf("Today(9,0,0,0) should be 09:xx:xx, got %02d:%02d:%02d",
+				today9AMTime.Hour(), today9AMTime.Minute(), today9AMTime.Second())
+		}
+
+		// 测试Offset
+		offset := ts.Offset(2, 30, 0, 0)
+		offsetTime := offset.ToTime()
+		originalTime := ts.ToTime()
+		diff := offsetTime.Sub(originalTime)
+		expectedDiff := 2*time.Hour + 30*time.Minute
+		if diff != expectedDiff {
+			t.Errorf("Offset failed: expected %v, got %v", expectedDiff, diff)
+		}
+	})
+
+	// 测试比较操作
+	t.Run("ComparisonOperations", func(t *testing.T) {
+		ts1 := NewTimestampFromDate(2022, 1, 1, 10, 0, 0, 0)
+		ts2 := NewTimestampFromDate(2022, 1, 1, 11, 0, 0, 0)
+		ts3 := NewTimestampFromDate(2022, 1, 1, 10, 0, 0, 0)
+
+		if !ts1.Less(ts2) {
+			t.Error("ts1 should be less than ts2")
+		}
+
+		if !ts2.Greater(ts1) {
+			t.Error("ts2 should be greater than ts1")
+		}
+
+		if !ts1.Equal(ts3) {
+			t.Error("ts1 should equal ts3")
+		}
+
+		if ts1.NotEqual(ts3) {
+			t.Error("ts1 should not be not-equal to ts3")
+		}
+	})
+
+	// 测试解析功能
+	t.Run("ParsingFunctions", func(t *testing.T) {
+		// 测试解析日期时间
+		ts, err := ParseTimestamp("2022-01-01 15:30:45")
+		if err != nil {
+			t.Errorf("Failed to parse timestamp: %v", err)
+		}
+
+		year, month, day := ts.Extract()
+		if year != 2022 || month != 1 || day != 1 {
+			t.Errorf("Parsed wrong date: %d-%d-%d", year, month, day)
+		}
+
+		// 测试解析时间
+		timeTS, err := ParseTimeOnly("15:30:45")
+		if err != nil {
+			t.Errorf("Failed to parse time: %v", err)
+		}
+
+		timeOnly := timeTS.OnlyTime()
+		if timeOnly != "15:30:45" {
+			t.Errorf("Expected time '15:30:45', got '%s'", timeOnly)
+		}
+	})
+
+	// 测试同一天检查
+	t.Run("SameDateCheck", func(t *testing.T) {
+		ts1 := NewTimestampFromDate(2022, 1, 1, 8, 0, 0, 0)
+		ts2 := NewTimestampFromDate(2022, 1, 1, 20, 0, 0, 0)
+		ts3 := NewTimestampFromDate(2022, 1, 2, 8, 0, 0, 0)
+
+		if !ts1.IsSameDate(ts2) {
+			t.Error("ts1 and ts2 should be on the same date")
+		}
+
+		if ts1.IsSameDate(ts3) {
+			t.Error("ts1 and ts3 should not be on the same date")
+		}
+	})
+
+	// 测试盘前时间
+	t.Run("PreMarketTime", func(t *testing.T) {
+		preMarket := PreMarketTimestamp(2022, 1, 1)
+		timeStr := preMarket.OnlyTime()
+		if timeStr != "09:00:00" {
+			t.Errorf("Pre-market time should be '09:00:00', got '%s'", timeStr)
+		}
+
+		// 测试实例方法的盘前时间
+		ts := NewTimestampFromDate(2022, 1, 1, 15, 30, 45, 123)
+		tsPreMarket := ts.PreMarketTime()
+		tsPreMarketTime := tsPreMarket.OnlyTime()
+		if tsPreMarketTime != "09:00:00" {
+			t.Errorf("Pre-market time should be '09:00:00', got '%s'", tsPreMarketTime)
+		}
+	})
 }
 
-func TestYMDHMS_SSS(t *testing.T) {
-	ms := Now()
-	ts := Timestamp(ms)
-	fmt.Println(ts.DateTime())
-	fmt.Println(ts)
-}
+// 基准测试：比较C++兼容层与Go原生实现的性能
+func BenchmarkCompatVsGoNative(b *testing.B) {
+	ms := int64(1640995200000)
 
-func TestNow(t *testing.T) {
-	now := Now()
-	fmt.Println("today1 :", now-now%MillisecondsPerDay)
-	fmt.Println("today2 :", ZeroHour(now))
-	fmt.Println("today3 :", Today())
-	fmt.Println("  h :", (now%MillisecondsPerDay)/MillisecondsPerHour)
-	fmt.Println("  m :", (now%MillisecondsPerHour)/MillisecondsPerMinute)
-	fmt.Println("  s :", (now%MillisecondsPerMinute)/MillisecondsPerSecond)
-	fmt.Println("sss :", now%MillisecondsPerSecond)
+	b.Run("Compat_Creation", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = NewTimestamp(ms)
+		}
+	})
 
-	fmt.Println(now % MillisecondsPerDay)
+	b.Run("GoNative_Creation", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = V1Timestamp(ms)
+		}
+	})
 
-	date := "2024-01-07"
-	tm, err := api.ParseTime(date)
-	fmt.Println(tm, err)
-	fmt.Println(tm.Date())
-	ts := tm.Local().Unix()
-	ts = tm.UnixMilli()
-	fmt.Println("today1 :", ts)
-	ts = tm.Local().UnixMilli()
-	fmt.Println("today2 :", ts+int64(offsetInSecondsEastOfUTC*MillisecondsPerSecond))
-	t1 := time.Unix(ts/1000, 0)
-	fmt.Println("t1 =>", t1)
-	t3 := TimeToTimestamp(tm)
-	fmt.Println("t3 =>", t3)
-	t4 := Time(t3)
-	fmt.Println("t4 =>", t4)
+	cppTs := NewTimestamp(ms)
+	goTs := V1Timestamp(ms)
 
-	t2 := time.UnixMilli(now) //.UTC()
-	fmt.Println("t2 =>", t2)
-}
+	b.Run("Compat_ToString", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = cppTs.String()
+		}
+	})
 
-func TestTime1(t *testing.T) {
-	formatTimeStr := "2017-04-11 13:33:37"
-	formatTimeStr = "2024-12-24 03:25:05 +0000 GMT"
-	formatTime, err := time.Parse("2006-01-02 15:04:05", formatTimeStr)
-	if err == nil {
-		fmt.Println(formatTime) //打印结果：2017-04-11 13:33:37 +0000 UTC
-		fmt.Println(formatTime.Unix())
-	}
-}
+	b.Run("GoNative_ToString", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = goTs.String()
+		}
+	})
 
-//func TestTime2(t *testing.T) {
-//	// 今天此刻
-//	fmt.Printf("%s", carbon.Now()) // 2020-08-05 13:14:15
-//}
+	b.Run("Compat_Comparison", func(b *testing.B) {
+		ts2 := NewTimestamp(ms + 1000)
+		for i := 0; i < b.N; i++ {
+			_ = cppTs.Less(ts2)
+		}
+	})
 
-func TestTime3(t *testing.T) {
-	t1 := zeroTime.UnixMilli()
-	fmt.Println(t1)
-	t2 := time.Now()
-	fmt.Println(t2)
-	t3 := time.Since(t2)
-	fmt.Println(t3.Seconds())
-}
-
-func TestSinceZeroHour(t *testing.T) {
-	now := time.Now()
-	t1 := SinceZeroHour(now)
-	fmt.Println(t1)
-	t2 := Since(now)
-	fmt.Println(t2)
-}
-
-func BenchmarkTimestamp_release(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tm := Now()
-		_ = tm
-	}
-}
-
-func BenchmarkTimestamp_v0(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		now := time.Now()
-		tm := now.UnixMilli()
-		_ = tm
-	}
-}
-
-func BenchmarkTimestamp_v1(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tm := v1Now()
-		_ = tm
-	}
-}
-
-func BenchmarkTimestamp_v2(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tm := v2Now()
-		_ = tm
-	}
-}
-
-func add_two(n int32) int32 {
-	return n + 2
-}
-
-func BenchmarkTimestamp_add_two(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		add_two(int32(i))
-	}
+	b.Run("GoNative_Comparison", func(b *testing.B) {
+		ts2 := V1Timestamp(ms + 1000)
+		for i := 0; i < b.N; i++ {
+			_ = goTs < ts2
+		}
+	})
 }
