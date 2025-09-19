@@ -606,10 +606,10 @@ install(TARGETS quant1x-std third_libs xtensor_optimize global_compile_options E
     INCLUDES DESTINATION include
 )
 
-# 安装 src 目录中的头文件到 quant1x 目录
+# 安装 src 目录中的头文件到 quant1x/std 目录
 install(
     DIRECTORY src/
-    DESTINATION include/quant1x
+    DESTINATION include/quant1x/std
     FILES_MATCHING
     PATTERN "*.h"
     PATTERN "*.hpp"
