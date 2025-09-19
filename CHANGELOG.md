@@ -3,10 +3,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.22] - 2025-09-20
+### Changed
+- 规范文件名
+- 调整homedir组件的两个公开函数的签名
+- 调整包路径
+- 调整信号的包路径, 改为core
+
 ## [0.0.21] - 2025-09-20
 ### Changed
 - 复制的第三方代码的LICENSE和README文件名增加项目名作为前缀
 - 复制的第三方代码的LICENSE和README文件名增加项目名作为前缀
+- update changelog
 
 ## [0.0.20] - 2025-09-19
 ### Changed
@@ -124,7 +132,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.21...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.22...HEAD
+[0.0.22]: https://gitee.com/quant1x/std.git/compare/v0.0.21...v0.0.22
 [0.0.21]: https://gitee.com/quant1x/std.git/compare/v0.0.20...v0.0.21
 [0.0.20]: https://gitee.com/quant1x/std.git/compare/v0.0.19...v0.0.20
 [0.0.19]: https://gitee.com/quant1x/std.git/compare/v0.0.18...v0.0.19
