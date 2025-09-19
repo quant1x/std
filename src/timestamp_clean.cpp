@@ -160,7 +160,6 @@ namespace exchange {
     }
 
     std::string timestamp::toString(const std::string& layout) const {
-        (void)layout;  // Suppress unused parameter warning
         if (ms_ == 0) {
             return "1970-01-01 00:00:00";
         }
@@ -181,7 +180,6 @@ namespace exchange {
     }
 
     std::string timestamp::toStringAsTimeInSeconds(const std::string& layout) const {
-        (void)layout;  // Suppress unused parameter warning
         auto time_t = static_cast<std::time_t>(ms_ / 1000);
         auto tm = *std::localtime(&time_t);
         

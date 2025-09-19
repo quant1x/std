@@ -4,15 +4,18 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <format>
 
 namespace exchange {
 
+    // 静态方法实现
     int64_t timestamp::current() {
         auto now = std::chrono::system_clock::now();
         auto duration = now.time_since_epoch();
         return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     }
 
+    // 构造函数
     timestamp::timestamp() : ms_(0) {}
 
     timestamp::timestamp(int64_t t) : ms_(t) {}
@@ -43,12 +46,14 @@ namespace exchange {
         ms_ = static_cast<int64_t>(time) * 1000 + sss;
     }
 
+    // 访问器
     int64_t timestamp::value() const {
         return ms_;
     }
 
+    // 静态工厂方法
     timestamp timestamp::pre_market_time(int year, int month, int day) {
-        return timestamp(year, month, day, 9, 0, 0, 0);
+        return timestamp(year, month, day, 9, 0, 0, 0);  // 默认9点整
     }
 
     timestamp timestamp::now() {
@@ -65,6 +70,7 @@ namespace exchange {
         }
 
         try {
+            // 尝试解析 "YYYY-MM-DD HH:MM:SS" 格式
             if (str.length() >= 19 && str[4] == '-' && str[7] == '-' && str[13] == ':' && str[16] == ':') {
                 int year = std::stoi(str.substr(0, 4));
                 int month = std::stoi(str.substr(5, 2));
@@ -74,6 +80,7 @@ namespace exchange {
                 int second = std::stoi(str.substr(17, 2));
                 return timestamp(year, month, day, hour, minute, second, 0);
             }
+            // 尝试解析 "YYYY-MM-DD" 格式
             else if (str.length() >= 10 && str[4] == '-' && str[7] == '-') {
                 int year = std::stoi(str.substr(0, 4));
                 int month = std::stoi(str.substr(5, 2));
@@ -94,6 +101,7 @@ namespace exchange {
                 int minute = std::stoi(str.substr(3, 2));
                 int second = std::stoi(str.substr(6, 2));
                 
+                // 使用当前日期
                 auto now = std::chrono::system_clock::now();
                 auto time_t = std::chrono::system_clock::to_time_t(now);
                 auto tm = *std::localtime(&time_t);
@@ -106,6 +114,7 @@ namespace exchange {
         throw std::invalid_argument("Invalid time format: " + str);
     }
 
+    // 基本时间操作
     timestamp timestamp::start_of_day() const {
         auto time_t = static_cast<std::time_t>(ms_ / 1000);
         auto tm = *std::localtime(&time_t);
@@ -160,7 +169,6 @@ namespace exchange {
     }
 
     std::string timestamp::toString(const std::string& layout) const {
-        (void)layout;  // Suppress unused parameter warning
         if (ms_ == 0) {
             return "1970-01-01 00:00:00";
         }
@@ -168,6 +176,7 @@ namespace exchange {
         auto time_t = static_cast<std::time_t>(ms_ / 1000);
         auto tm = *std::localtime(&time_t);
         
+        // 简化格式化，忽略复杂的layout参数
         std::ostringstream oss;
         oss << std::setfill('0')
             << std::setw(4) << (tm.tm_year + 1900) << "-"
@@ -181,7 +190,6 @@ namespace exchange {
     }
 
     std::string timestamp::toStringAsTimeInSeconds(const std::string& layout) const {
-        (void)layout;  // Suppress unused parameter warning
         auto time_t = static_cast<std::time_t>(ms_ / 1000);
         auto tm = *std::localtime(&time_t);
         
@@ -230,6 +238,7 @@ namespace exchange {
         return yyyymmdd() == other.yyyymmdd();
     }
 
+    // 比较操作符
     bool timestamp::operator==(const timestamp& rhs) const {
         return ms_ == rhs.ms_;
     }
@@ -254,8 +263,9 @@ namespace exchange {
         return ms_ >= rhs.ms_;
     }
 
+    // 流输出
     std::ostream& operator<<(std::ostream& os, const timestamp& ts) {
         return os << ts.toString();
     }
 
-}
+} // namespace exchange

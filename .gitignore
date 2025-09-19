@@ -46,3 +46,4 @@ vcpkg_installed/
 # Added by cargo
 
 target/
+*build*/
