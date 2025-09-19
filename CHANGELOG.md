@@ -3,11 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.17] - 2025-09-19
+### Changed
+- 优化rust命名空间
+- 优化cpu亲和性, 增加numa感知
+
 ## [0.0.16] - 2025-09-19
 ### Changed
 - 调整部分c++ time时间戳代码，补充说明
 - 优化go版本时间戳的解析函数，提高容错性
 - 优化rust 时间戳的字符串解析的兼容性
+- update changelog
 
 ## [0.0.15] - 2025-09-19
 ### Changed
@@ -97,7 +103,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.16...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.17...HEAD
+[0.0.17]: https://gitee.com/quant1x/std.git/compare/v0.0.16...v0.0.17
 [0.0.16]: https://gitee.com/quant1x/std.git/compare/v0.0.15...v0.0.16
 [0.0.15]: https://gitee.com/quant1x/std.git/compare/v0.0.14...v0.0.15
 [0.0.14]: https://gitee.com/quant1x/std.git/compare/v0.0.13...v0.0.14
