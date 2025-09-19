@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.10] - 2025-09-19
+### Changed
+- 删除废弃的实验性代码
+
 ## [0.0.9] - 2025-09-19
 ### Changed
 - 调整TreeMap测试代码
 - 修复testing错误日志接口的调用方式
+- update changelog
 
 ## [0.0.8] - 2025-09-18
 ### Changed
@@ -52,7 +57,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.9...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.10...HEAD
+[0.0.10]: https://gitee.com/quant1x/std.git/compare/v0.0.9...v0.0.10
 [0.0.9]: https://gitee.com/quant1x/std.git/compare/v0.0.8...v0.0.9
 [0.0.8]: https://gitee.com/quant1x/std.git/compare/v0.0.7...v0.0.8
 [0.0.7]: https://gitee.com/quant1x/std.git/compare/v0.0.6...v0.0.7
