@@ -3,9 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.11] - 2025-09-19
+### Changed
+- 新增对象池的接口定义
+- 初始化rust库项目
+
 ## [0.0.10] - 2025-09-19
 ### Changed
 - 删除废弃的实验性代码
+- update changelog
 
 ## [0.0.9] - 2025-09-19
 ### Changed
@@ -57,7 +63,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.10...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.11...HEAD
+[0.0.11]: https://gitee.com/quant1x/std.git/compare/v0.0.10...v0.0.11
 [0.0.10]: https://gitee.com/quant1x/std.git/compare/v0.0.9...v0.0.10
 [0.0.9]: https://gitee.com/quant1x/std.git/compare/v0.0.8...v0.0.9
 [0.0.8]: https://gitee.com/quant1x/std.git/compare/v0.0.7...v0.0.8
