@@ -3,9 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.21] - 2025-09-20
+### Changed
+- 复制的第三方代码的LICENSE和README文件名增加项目名作为前缀
+- 复制的第三方代码的LICENSE和README文件名增加项目名作为前缀
+
 ## [0.0.20] - 2025-09-19
 ### Changed
 - 将go代码中字符串的风格转换函数为c++代码
+- update changelog
 
 ## [0.0.19] - 2025-09-19
 ### Changed
@@ -118,7 +124,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.20...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.21...HEAD
+[0.0.21]: https://gitee.com/quant1x/std.git/compare/v0.0.20...v0.0.21
 [0.0.20]: https://gitee.com/quant1x/std.git/compare/v0.0.19...v0.0.20
 [0.0.19]: https://gitee.com/quant1x/std.git/compare/v0.0.18...v0.0.19
 [0.0.18]: https://gitee.com/quant1x/std.git/compare/v0.0.17...v0.0.18
