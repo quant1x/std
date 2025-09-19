@@ -32,11 +32,11 @@ func TestTimestampCompatLayer(t *testing.T) {
 		// 使用相同的毫秒数创建
 		ms := int64(1640995200000)
 		cppTs := NewTimestamp(ms)
-		goTs := V1Timestamp(ms)
+		goTs := NewTimestamp(ms)
 
 		// 比较时间转换结果
 		cppTime := cppTs.ToTime()
-		goTime := Time(int64(goTs))
+		goTime := goTs.ToTime()
 
 		if !cppTime.Equal(goTime) {
 			t.Errorf("Time conversion inconsistent: cpp=%v, go=%v", cppTime, goTime)
@@ -189,12 +189,12 @@ func BenchmarkCompatVsGoNative(b *testing.B) {
 
 	b.Run("GoNative_Creation", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_ = V1Timestamp(ms)
+			_ = NewTimestamp(ms)
 		}
 	})
 
 	cppTs := NewTimestamp(ms)
-	goTs := V1Timestamp(ms)
+	goTs := NewTimestamp(ms)
 
 	b.Run("Compat_ToString", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
@@ -216,9 +216,9 @@ func BenchmarkCompatVsGoNative(b *testing.B) {
 	})
 
 	b.Run("GoNative_Comparison", func(b *testing.B) {
-		ts2 := V1Timestamp(ms + 1000)
+		ts2 := NewTimestamp(ms + 1000)
 		for i := 0; i < b.N; i++ {
-			_ = goTs < ts2
+			_ = goTs.Less(ts2)
 		}
 	})
 }

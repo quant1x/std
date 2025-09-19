@@ -18,26 +18,6 @@ const (
 	MillisecondsPerDay    = SecondsPerDay * MillisecondsPerSecond
 )
 
-const (
-	// The unsigned zero year for internal calculations.
-	// Must be 1 mod 400, and times before it will not compute correctly,
-	// but otherwise can be changed at will.
-	absoluteZeroYear = -292277022399
-
-	// The year of the zero Time.
-	// Assumed by the unixToInternal computation below.
-	internalYear = 1
-
-	// Offsets to convert between internal and absolute or Unix times.
-	absoluteToInternal int64 = (absoluteZeroYear - internalYear) * 365.2425 * SecondsPerDay
-	internalToAbsolute       = -absoluteToInternal
-
-	unixToInternal int64 = (1969*365 + 1969/4 - 1969/100 + 1969/400) * SecondsPerDay
-	internalToUnix int64 = -unixToInternal
-
-	wallToInternal int64 = (1884*365 + 1884/4 - 1884/100 + 1884/400) * SecondsPerDay
-)
-
 // CurrentDateZero t日期的0点整
 func CurrentDateZero(t time.Time) time.Time {
 	y, m, d := t.Date()
@@ -55,41 +35,6 @@ func TodayZero() time.Time {
 func SinceZeroHour(t time.Time) int64 {
 	zero := CurrentDateZero(t)
 	return t.Sub(zero).Milliseconds()
-}
-
-// V1Timestamp 兼容旧版时间戳类型
-type V1Timestamp int64
-
-// abs returns the time t as an absolute time, adjusted by the zone offset.
-// It is called when computing a presentation property like Month or Hour.
-func (t V1Timestamp) abs() uint64 {
-	//l := defaultLocal
-	ms := int64(t / MillisecondsPerSecond)
-	return uint64(ms + (unixToInternal + internalToAbsolute))
-}
-
-// 调用公开结构的私有方法
-//
-//go:linkname absDate time.absDate
-func absDate(abs uint64, full bool) (year int, month time.Month, day int, yday int)
-
-// DateTime 获取日期时间毫秒
-func (t V1Timestamp) DateTime() (year, month, day, hour, minute, second, millisecond int) {
-	ms := int64(t)
-	absSeconds := t.abs()
-	year, m, day, yday := absDate(absSeconds, true)
-	_ = yday
-	month = int(m)
-	hour = int((ms % MillisecondsPerDay) / MillisecondsPerHour)
-	minute = int((ms % MillisecondsPerHour) / MillisecondsPerMinute)
-	second = int((ms % MillisecondsPerMinute) / MillisecondsPerSecond)
-	millisecond = int(ms % MillisecondsPerSecond)
-	return
-}
-
-func (t V1Timestamp) String() string {
-	year, month, day, hour, minute, second, millisecond := t.DateTime()
-	return fmt.Sprintf("%04d-%02d-%02d %02d:%02d:%02d.%03d", year, month, day, hour, minute, second, millisecond)
 }
 
 // Timestamp C++风格的时间戳实现，提供与C++ timestamp类相同的API
@@ -116,7 +61,6 @@ const (
 func now() (sec int64, nsec int32, mono int64)
 
 var (
-	defaultLocal = time.Local
 	// 获取偏移的秒数
 	zoneName, offsetInSecondsEastOfUTC = time.Now().Zone()
 	_                                  = zoneName
@@ -128,13 +72,6 @@ var (
 
 // Now 获取本地当前的时间戳, 毫秒数 (UTC 转 local)
 func Now() int64 {
-	sec, nsec, _ := now()
-	sec += int64(offsetInSecondsEastOfUTC)
-	milli := sec*MillisecondsPerSecond + int64(nsec)/1e6%MillisecondsPerSecond
-	return milli
-}
-
-func v1Now() int64 {
 	sec, nsec, _ := now()
 	sec += int64(offsetInSecondsEastOfUTC)
 	milli := sec*MillisecondsPerSecond + int64(nsec)/1e6%MillisecondsPerSecond
@@ -448,12 +385,12 @@ func (t Timestamp) ToTime() time.Time {
 	return Time(t.ms)
 }
 
-// AsTimestamp 转换为Go原生Timestamp类型
-func (t Timestamp) AsTimestamp() V1Timestamp {
-	return V1Timestamp(t.ms)
+// AsTimestamp 转换为Go原生int64时间戳
+func (t Timestamp) AsTimestamp() int64 {
+	return t.ms
 }
 
-// FromTimestamp 从Go原生Timestamp类型创建
-func FromTimestamp(ts V1Timestamp) Timestamp {
-	return Timestamp{ms: int64(ts)}
+// FromTimestamp 从Go原生int64时间戳创建
+func FromTimestamp(ts int64) Timestamp {
+	return Timestamp{ms: ts}
 }
