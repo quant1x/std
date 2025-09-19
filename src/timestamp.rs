@@ -107,22 +107,32 @@ impl Timestamp {
     }
 
     /// 解析日期时间字符串
+    /// 解析日期时间字符串 - 主要用于日期格式，也支持包含时间
     /// 
     /// 支持多种格式：
     /// - "2022-01-01 15:30:45"
     /// - "2022-01-01"
     /// - "2022/01/01 15:30:45"
+    /// - "20220101" 
+    /// - ISO 8601 等格式
     pub fn parse(s: &str) -> Result<Self, chrono::ParseError> {
-        // 尝试多种格式解析
+        // 偏向日期格式，但也支持包含时间的格式
         let formats = [
-            "%Y-%m-%d %H:%M:%S%.f",
-            "%Y-%m-%d %H:%M:%S",
-            "%Y-%m-%d",
-            "%Y/%m/%d %H:%M:%S%.f",
-            "%Y/%m/%d %H:%M:%S",
-            "%Y/%m/%d",
+            "%Y-%m-%d %H:%M:%S%.f",    // 完整日期时间+毫秒
+            "%Y-%m-%d %H:%M:%S",       // 完整日期时间
+            "%Y-%m-%d",                // 仅日期
+            "%Y%m%d",                  // 紧凑日期格式
+            "%Y/%m/%d %H:%M:%S%.f",    // 斜杠分隔的日期时间+毫秒
+            "%Y/%m/%d %H:%M:%S",       // 斜杠分隔的日期时间
+            "%Y/%m/%d",                // 斜杠分隔的日期
+            "%m/%d/%Y %H:%M:%S",       // 美式日期时间
+            "%H:%M:%S %d-%m-%Y",       // 时间在前的格式
+            "%Y%m%d %H%M%S",           // 紧凑日期时间
+            "%Y-%m-%dT%H:%M:%SZ",      // ISO 8601 UTC
+            "%Y-%m-%dT%H:%M:%S%z",     // ISO 8601 with timezone
         ];
 
+        // 尝试日期时间格式
         for format in &formats {
             if let Ok(naive_dt) = NaiveDateTime::parse_from_str(s, format) {
                 if let Some(dt) = Local.from_local_datetime(&naive_dt).single() {
@@ -132,7 +142,8 @@ impl Timestamp {
         }
 
         // 尝试仅日期格式
-        for format in &["%Y-%m-%d", "%Y/%m/%d"] {
+        let date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d"];
+        for format in &date_formats {
             if let Ok(naive_date) = NaiveDate::parse_from_str(s, format) {
                 if let Some(naive_dt) = naive_date.and_hms_opt(0, 0, 0) {
                     if let Some(dt) = Local.from_local_datetime(&naive_dt).single() {
@@ -146,18 +157,63 @@ impl Timestamp {
         Err(chrono::NaiveDateTime::parse_from_str("invalid", "%Y-%m-%d").unwrap_err())
     }
 
-    /// 解析时间字符串（仅时间部分）
+    /// 解析时间字符串 - 主要用于时间格式，但也兼容完整日期时间
+    /// 
+    /// 设计目的：用户关注时分秒时使用，但不限制输入格式
+    /// 既支持纯时间，也支持包含日期的格式
     /// 
     /// # Arguments
-    /// * `s` - 时间字符串，如 "14:30:45"
+    /// * `s` - 时间字符串，如 "14:30:45" 或 "2022-01-01 14:30:45"
     pub fn parse_time(s: &str) -> Result<Self, chrono::ParseError> {
-        let time_formats = ["%H:%M:%S%.f", "%H:%M:%S", "%H:%M"];
+        // 既支持纯时间，也支持包含日期的格式
+        let all_formats = [
+            // 纯时间格式
+            "%H:%M:%S%.f",             // 时间+毫秒
+            "%H:%M:%S",                // 标准时间
+            "%H:%M",                   // 时分
+            "%H%M%S",                  // 紧凑时间
+            "%H%M",                    // 紧凑时分
+            // 完整日期时间格式（兼容性）
+            "%Y-%m-%d %H:%M:%S%.f",    // 完整日期时间+毫秒
+            "%Y-%m-%d %H:%M:%S",       // 完整日期时间
+            "%Y-%m-%d",                // 仅日期
+            "%Y%m%d",                  // 紧凑日期
+            "%Y/%m/%d %H:%M:%S",       // 斜杠日期时间
+            "%m/%d/%Y %H:%M:%S",       // 美式日期时间
+            "%H:%M:%S %d-%m-%Y",       // 时间在前
+            "%Y%m%d %H%M%S",           // 紧凑日期时间
+            "%Y-%m-%dT%H:%M:%SZ",      // ISO 8601 UTC
+            "%Y-%m-%dT%H:%M:%S%z",     // ISO 8601 with timezone
+        ];
         
-        for format in &time_formats {
+        // 首先尝试纯时间格式
+        let time_only_formats = ["%H:%M:%S%.f", "%H:%M:%S", "%H:%M", "%H%M%S", "%H%M"];
+        for format in &time_only_formats {
             if let Ok(time) = chrono::NaiveTime::parse_from_str(s, format) {
                 let today = Local::now().date_naive();
                 if let Some(dt) = today.and_time(time).and_local_timezone(Local).single() {
                     return Ok(Self::from_datetime(dt));
+                }
+            }
+        }
+        
+        // 然后尝试完整的日期时间格式
+        for format in &all_formats[5..] { // 跳过已经尝试过的时间格式
+            if let Ok(naive_dt) = NaiveDateTime::parse_from_str(s, format) {
+                if let Some(dt) = Local.from_local_datetime(&naive_dt).single() {
+                    return Ok(Self::from_datetime(dt));
+                }
+            }
+        }
+        
+        // 尝试仅日期格式
+        let date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d"];
+        for format in &date_formats {
+            if let Ok(naive_date) = NaiveDate::parse_from_str(s, format) {
+                if let Some(naive_dt) = naive_date.and_hms_opt(0, 0, 0) {
+                    if let Some(dt) = Local.from_local_datetime(&naive_dt).single() {
+                        return Ok(Self::from_datetime(dt));
+                    }
                 }
             }
         }
@@ -385,6 +441,188 @@ mod tests {
         assert_eq!(year, 2022);
         assert_eq!(month, 6);
         assert_eq!(day, 15);
+    }
+
+    #[test]
+    fn test_timestamp_parse_comprehensive() {
+        // 测试 parse() 函数 - 主要用于日期格式，也支持时间
+        
+        // 完整日期时间格式
+        let ts1 = Timestamp::parse("2022-06-15 14:30:45").unwrap();
+        let (year, month, day) = ts1.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+        
+        // 仅日期格式
+        let ts2 = Timestamp::parse("2022-06-15").unwrap();
+        let (year, month, day) = ts2.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+        
+        // 紧凑日期格式
+        let ts3 = Timestamp::parse("20220615").unwrap();
+        let (year, month, day) = ts3.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+        
+        // 斜杠分隔格式
+        let ts4 = Timestamp::parse("2022/06/15 14:30:45").unwrap();
+        let (year, month, day) = ts4.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+    }
+
+    #[test]  
+    fn test_timestamp_parse_time_comprehensive() {
+        // 测试 parse_time() 函数 - 主要用于时间格式，但也兼容完整日期时间
+        
+        // 纯时间格式 - 应该配合今天的日期
+        let now = chrono::Local::now();
+        let today_year = now.year();
+        let today_month = now.month();
+        let today_day = now.day();
+        
+        let ts1 = Timestamp::parse_time("14:30:45").unwrap();
+        let dt1 = ts1.to_datetime();
+        assert_eq!(dt1.hour(), 14);
+        assert_eq!(dt1.minute(), 30);
+        assert_eq!(dt1.second(), 45);
+        // 应该是今天的日期
+        assert_eq!(dt1.year(), today_year);
+        assert_eq!(dt1.month(), today_month);
+        assert_eq!(dt1.day(), today_day);
+        
+        // 紧凑时间格式
+        let ts2 = Timestamp::parse_time("143045").unwrap();
+        let dt2 = ts2.to_datetime();
+        assert_eq!(dt2.hour(), 14);
+        assert_eq!(dt2.minute(), 30);
+        assert_eq!(dt2.second(), 45);
+        
+        // 兼容完整日期时间格式
+        let ts3 = Timestamp::parse_time("2022-06-15 14:30:45").unwrap();
+        let (year, month, day) = ts3.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+        let dt3 = ts3.to_datetime();
+        assert_eq!(dt3.hour(), 14);
+        assert_eq!(dt3.minute(), 30);
+        assert_eq!(dt3.second(), 45);
+        
+        // 兼容仅日期格式
+        let ts4 = Timestamp::parse_time("2022-06-15").unwrap();
+        let (year, month, day) = ts4.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+        
+        // 兼容紧凑日期格式
+        let ts5 = Timestamp::parse_time("20220615").unwrap();
+        let (year, month, day) = ts5.extract();
+        assert_eq!(year, 2022);
+        assert_eq!(month, 6);
+        assert_eq!(day, 15);
+    }
+
+    #[test]
+    fn test_parse_flexibility_and_tolerance() {
+        // 测试解析函数的容错性和灵活性 - 这是这次修改的核心特性
+        
+        println!("=== 测试 parse() 的灵活性 ===");
+        
+        // parse() 主要用于日期，但也能处理时间
+        let test_cases_parse = vec![
+            ("2022-06-15", "仅日期"),
+            ("2022-06-15 14:30:45", "完整日期时间"),
+            ("20220615", "紧凑日期"),
+            ("2022/06/15", "斜杠日期"),
+            ("2022/06/15 14:30:45", "斜杠日期时间"),
+        ];
+        
+        for (input, desc) in test_cases_parse {
+            match Timestamp::parse(input) {
+                Ok(ts) => {
+                    println!("✓ parse('{}') [{}] -> {}", input, desc, ts.to_string());
+                    let (year, month, day) = ts.extract();
+                    assert_eq!(year, 2022);
+                    assert_eq!(month, 6); 
+                    assert_eq!(day, 15);
+                },
+                Err(e) => panic!("❌ parse('{}') [{}] failed: {}", input, desc, e),
+            }
+        }
+        
+        println!("\n=== 测试 parse_time() 的灵活性 ===");
+        
+        // parse_time() 主要用于时间，但也能处理完整日期时间
+        let test_cases_parse_time = vec![
+            ("14:30:45", "纯时间 - 应配合今天"),
+            ("143045", "紧凑时间 - 应配合今天"),
+            ("14:30", "时分 - 应配合今天"),
+            ("2022-06-15 14:30:45", "完整日期时间 - 兼容性"),
+            ("2022-06-15", "仅日期 - 兼容性"),
+            ("20220615", "紧凑日期 - 兼容性"),
+        ];
+        
+        for (input, desc) in test_cases_parse_time {
+            match Timestamp::parse_time(input) {
+                Ok(ts) => {
+                    println!("✓ parse_time('{}') [{}] -> {}", input, desc, ts.to_string());
+                    let dt = ts.to_datetime();
+                    
+                    if input.starts_with("2022") {
+                        // 包含日期的情况
+                        let (year, month, day) = ts.extract();
+                        assert_eq!(year, 2022);
+                        assert_eq!(month, 6);
+                        assert_eq!(day, 15);
+                    } else {
+                        // 纯时间的情况，应该是今天的日期
+                        let now = chrono::Local::now();
+                        assert_eq!(dt.year(), now.year());
+                        assert_eq!(dt.month(), now.month());
+                        assert_eq!(dt.day(), now.day());
+                    }
+                    
+                    if input.contains(":") || input.len() == 6 {
+                        // 包含时间的情况
+                        if input.contains("14") {
+                            assert_eq!(dt.hour(), 14);
+                        }
+                        if input.contains("30") {
+                            assert_eq!(dt.minute(), 30);
+                        }
+                    }
+                },
+                Err(e) => panic!("❌ parse_time('{}') [{}] failed: {}", input, desc, e),
+            }
+        }
+        
+        println!("\n=== 测试用户使用场景 ===");
+        
+        // 用户场景1: 只关注时分秒，不关注日期
+        let time_only = Timestamp::parse_time("14:30:45").unwrap();
+        println!("用户场景1 - 只关注时间: parse_time('14:30:45') -> {}", time_only.to_string());
+        
+        // 用户场景2: 传入完整日期时间给parse_time，不应该失败
+        let full_datetime = Timestamp::parse_time("2022-06-15 14:30:45").unwrap();
+        println!("用户场景2 - 完整日期时间给parse_time: parse_time('2022-06-15 14:30:45') -> {}", full_datetime.to_string());
+        
+        // 验证两种场景都成功了
+        assert_eq!(time_only.to_datetime().hour(), 14);
+        assert_eq!(time_only.to_datetime().minute(), 30);
+        assert_eq!(time_only.to_datetime().second(), 45);
+        
+        assert_eq!(full_datetime.to_datetime().hour(), 14);
+        assert_eq!(full_datetime.to_datetime().minute(), 30);
+        assert_eq!(full_datetime.to_datetime().second(), 45);
+        
+        println!("✓ 所有用户场景测试通过！");
     }
 
     #[test]
