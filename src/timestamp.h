@@ -10,7 +10,7 @@
 #include <sstream>
 #include <tuple>
 
-namespace exchange {
+namespace quant1x {
 
     constexpr const int64_t seconds_per_minute      = 60;
     constexpr const int64_t seconds_per_hour        = 60 * seconds_per_minute;
@@ -36,9 +36,9 @@ namespace exchange {
     public:
         timestamp();
         timestamp(int64_t t);
-        timestamp(const std::chrono::system_clock::time_point &tp);
+        timestamp(const ::std::chrono::system_clock::time_point &tp);
         // 默认接受日期时间
-        timestamp(const std::string &str);
+        timestamp(const ::std::string &str);
 
         /**
          * @brief 通过本地时间构造时间戳
@@ -77,10 +77,10 @@ namespace exchange {
         static timestamp zero();
 
         // 解析日期时间
-        static timestamp parse(const std::string &str);
+        static timestamp parse(const ::std::string &str);
 
-        // 仅解析时间
-        static timestamp parse_time(const std::string &str);
+        // 解析时间格式字符串
+        static timestamp parse_time(const ::std::string &str);
 
         // 获取当前时间戳对应的当天零点（00:00:00.000）的时间戳 truncate
         timestamp start_of_day() const;
@@ -105,7 +105,7 @@ namespace exchange {
         timestamp ceil() const;
 
         // 提取年月日
-        std::tuple<int, int, int> extract() const;
+        ::std::tuple<int, int, int> extract() const;
         // 以毫秒为单位格式化时间戳
         std::string toString(const std::string &layout = "{:%Y-%m-%d %H:%M:%S}") const;
         // 截断毫秒数, 以秒为单位格式化时间, 默认输出时分秒
@@ -120,7 +120,7 @@ namespace exchange {
         // 是否为空, 即零值
         bool empty() const;
 
-        friend std::ostream &operator<<(std::ostream &os, const timestamp &ts);
+        friend ::std::ostream &operator<<(::std::ostream &os, const timestamp &ts);
         // 赋值操作符
         timestamp &operator=(int64_t val) {
             ms_ = val;
@@ -143,6 +143,7 @@ namespace exchange {
         bool operator<=(const timestamp &rhs) const;
         bool operator>=(const timestamp &rhs) const;
     };
-}  // namespace exchange
+
+} // namespace quant1x
 
 #endif  // QUANT1X_EXCHANGE_TIMESTAMP_H

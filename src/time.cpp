@@ -360,4 +360,4 @@ namespace api {
 
         return {quarter, firstOfQuarter, lastOfQuarter};
     }
-}
+} // namespace api

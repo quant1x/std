@@ -1,7 +1,7 @@
 #include "timestamp.h"
 #include "time.h"
 
-namespace exchange {
+namespace quant1x {
 
     constexpr auto only_date_layout = "{:%Y-%m-%d}";
     constexpr auto cache_date_layout = "{:%Y%m%d}";
@@ -266,4 +266,5 @@ namespace exchange {
     bool timestamp::operator>=(const timestamp &rhs) const {
         return ms_ >= rhs.ms_;
     }
-}
+
+} // namespace quant1x

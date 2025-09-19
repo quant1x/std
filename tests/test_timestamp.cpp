@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "../src/timestamp.h"
 
-using namespace exchange;
+using namespace quant1x;
 
 class TimestampTest : public ::testing::Test {
 protected:

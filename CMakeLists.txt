@@ -357,6 +357,8 @@ set(std-headers
     src/safe.h
     src/simd.h
     src/cpu_info.h
+    src/time.h
+    src/timestamp.h
 )
 
 set(std-sources
