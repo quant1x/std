@@ -291,17 +291,22 @@ func (t Timestamp) IsSameDate(other Timestamp) bool {
 	return day1 == day2
 }
 
-// ParseTimestamp 解析日期时间字符串 - 对应C++的parse()
+// ParseTimestamp 解析日期时间字符串 - 主要用于日期格式，也支持包含时间 - 对应C++的parse()
 func ParseTimestamp(str string) (Timestamp, error) {
-	// 尝试多种格式解析
+	// 尝试多种格式解析，偏向日期格式
 	formats := []string{
-		TimeLayoutWithMS,
-		DefaultLayout,
-		OnlyDateLayout,
-		"2006-01-02T15:04:05.000Z07:00",
-		"2006-01-02T15:04:05Z07:00",
-		"2006/01/02 15:04:05",
-		"2006/01/02",
+		"2006-01-02 15:04:05.000",       // 完整日期时间+毫秒
+		"2006-01-02 15:04:05",           // 完整日期时间
+		"2006-01-02",                    // 仅日期
+		"20060102",                      // 紧凑日期格式
+		"2006/01/02 15:04:05",           // 斜杠分隔的日期时间
+		"01/02/2006 15:04:05",           // 美式日期时间
+		"15:04:05 02-01-2006",           // 时间在前的格式
+		"20060102 150405",               // 紧凑日期时间
+		"2006-01-02T15:04:05Z",          // ISO 8601 UTC
+		"2006-01-02T15:04:05Z07:00",     // ISO 8601 with timezone
+		"Mon, 02 Jan 2006 15:04:05 MST", // RFC 1123
+		"Jan 02 2006 15:04:05",          // 月份名格式
 	}
 
 	for _, format := range formats {
@@ -310,27 +315,32 @@ func ParseTimestamp(str string) (Timestamp, error) {
 		}
 	}
 
-	return ZeroTimestamp(), fmt.Errorf("unable to parse time string: %s", str)
+	return ZeroTimestamp(), fmt.Errorf("unable to parse date string: %s", str)
 }
 
-// ParseTimeOnly 仅解析时间 - 对应C++的parse_time()
+// ParseTimeOnly 解析时间字符串 - 主要用于时间格式，但也兼容完整日期时间 - 对应C++的parse_time()
 func ParseTimeOnly(str string) (Timestamp, error) {
-	// 时间格式，通常配合今天的日期
+	// 设计目的：用户关注时分秒时使用，但不限制输入格式
+	// 既支持纯时间，也支持包含日期的格式
 	timeFormats := []string{
-		"15:04:05.000",
-		"15:04:05",
-		"15:04",
+		"15:04:05",                      // 纯时间
+		"2006-01-02 15:04:05",           // 完整日期时间
+		"2006-01-02",                    // 仅日期
+		"20060102",                      // 紧凑日期
+		"2006/01/02 15:04:05",           // 斜杠日期时间
+		"01/02/2006 15:04:05",           // 美式日期时间
+		"15:04:05 02-01-2006",           // 时间在前
+		"150405",                        // 紧凑时间
+		"20060102 150405",               // 紧凑日期时间
+		"2006-01-02T15:04:05Z",          // ISO 8601 UTC
+		"2006-01-02T15:04:05Z07:00",     // ISO 8601 with timezone
+		"Mon, 02 Jan 2006 15:04:05 MST", // RFC 1123
+		"Jan 02 2006 15:04:05",          // 月份名格式
 	}
-
-	now := time.Now()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 
 	for _, format := range timeFormats {
 		if t, err := time.ParseInLocation(format, str, time.Local); err == nil {
-			// 合并今天的日期和解析的时间
-			finalTime := time.Date(today.Year(), today.Month(), today.Day(),
-				t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.Local)
-			return NewTimestampFromTime(finalTime), nil
+			return NewTimestampFromTime(t), nil
 		}
 	}
 
