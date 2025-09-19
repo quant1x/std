@@ -3,10 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.13] - 2025-09-19
+### Changed
+- 优化timestamp的实现
+- 删除废弃的不同平台的时间戳实现
+- 新增rust实现timestamp
+- 构建cmake配置
+- 新增基础版本的库代码，包括第三方库
+- 新增cmake分模块的配置文件
+
 ## [0.0.12] - 2025-09-19
 ### Changed
 - 实现c++版本的exchange::timestamp类
 - 修正演示代码
+- update changelog
 
 ## [0.0.11] - 2025-09-19
 ### Changed
@@ -69,7 +79,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.12...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.13...HEAD
+[0.0.13]: https://gitee.com/quant1x/std.git/compare/v0.0.12...v0.0.13
 [0.0.12]: https://gitee.com/quant1x/std.git/compare/v0.0.11...v0.0.12
 [0.0.11]: https://gitee.com/quant1x/std.git/compare/v0.0.10...v0.0.11
 [0.0.10]: https://gitee.com/quant1x/std.git/compare/v0.0.9...v0.0.10
