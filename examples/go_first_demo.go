@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+
 	"gitee.com/quant1x/std/timestamp"
 )
 
@@ -14,10 +15,10 @@ func main() {
 
 	// 使用Go风格的API
 	ts1 := timestamp.Now()
-	goTs1 := timestamp.Timestamp(ts1)
+	goTs1 := timestamp.V1Timestamp(ts1)
 	fmt.Printf("当前时间戳(Go): %s\n", goTs1.String())
 
-	goTs2 := timestamp.Timestamp(1640995200000)
+	goTs2 := timestamp.V1Timestamp(1640995200000)
 	fmt.Printf("从毫秒创建(Go): %s\n", goTs2.String())
 
 	// Go风格的比较
@@ -28,10 +29,10 @@ func main() {
 	fmt.Println("\n2. C++兼容层API:")
 
 	// 使用C++风格的API（兼容层）
-	cppTs1 := timestamp.NowTimestampCpp()
+	cppTs1 := timestamp.NowTimestamp()
 	fmt.Printf("当前时间戳(C++风格): %s\n", cppTs1.String())
 
-	cppTs2 := timestamp.NewTimestampCpp(1640995200000)
+	cppTs2 := timestamp.NewTimestamp(1640995200000)
 	fmt.Printf("从毫秒创建(C++风格): %s\n", cppTs2.String())
 
 	// C++风格的比较
@@ -43,7 +44,7 @@ func main() {
 
 	// Go和C++风格混合使用
 	goNow := timestamp.Now()
-	goTs := timestamp.Timestamp(goNow)
+	goTs := timestamp.V1Timestamp(goNow)
 	cppTs := timestamp.FromTimestamp(goTs) // Go -> C++风格
 	backToGo := cppTs.AsTimestamp()        // C++风格 -> Go
 
@@ -59,7 +60,7 @@ func main() {
 	fmt.Println("\n4. 功能对比演示:")
 
 	// 创建测试时间戳
-	testTime := timestamp.NewTimestampCppFromDate(2022, 6, 15, 14, 30, 45, 123)
+	testTime := timestamp.NewTimestampFromDate(2022, 6, 15, 14, 30, 45, 123)
 
 	fmt.Println("C++风格的丰富API:")
 	fmt.Printf("  完整时间: %s\n", testTime.ToString())
@@ -91,7 +92,7 @@ func main() {
 	goResult := timestamp.Time(milliseconds).Format("2006-01-02 15:04:05")
 
 	// C++风格处理
-	cppResult := timestamp.NewTimestampCpp(milliseconds).ToString("2006-01-02 15:04:05")
+	cppResult := timestamp.NewTimestamp(milliseconds).ToString("2006-01-02 15:04:05")
 
 	fmt.Printf("Go处理结果: %s\n", goResult)
 	fmt.Printf("C++风格处理结果: %s\n", cppResult)
