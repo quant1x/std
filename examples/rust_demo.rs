@@ -1,4 +1,4 @@
-// Rust版本的timestamp演示程序
+// Rust implementation demo
 use quant1x_std::Timestamp;
 
 fn main() {
