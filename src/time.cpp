@@ -98,12 +98,12 @@ namespace api {
             return 0;
         }
         std::istringstream iss(str_time);
-        // 尝试多种格式
+        // 尝试多种格式 - 既支持纯时间，也支持包含日期的格式
         static const auto only_time_layout_supports = {
-            "%H:%M:%S",                  // 14:30:00
-            "%Y-%m-%d %H:%M:%S",         // 2023-05-15 14:30:00
-            "%Y-%m-%d",                  // 2023-05-15
-            "%Y%m%d",                    // 20230515
+            "%H:%M:%S",                  // 14:30:00 (纯时间)
+            "%Y-%m-%d %H:%M:%S",         // 2023-05-15 14:30:00 (完整日期时间)
+            "%Y-%m-%d",                  // 2023-05-15 (仅日期)
+            "%Y%m%d",                    // 20230515 (紧凑日期)
             "%Y/%m/%d %H:%M:%S",         // 2023/05/15 14:30:00
             "%m/%d/%Y %H:%M:%S",         // 05/15/2023 14:30:00
             "%H:%M:%S %d-%m-%Y",         // 14:30:00 15-05-2023
@@ -127,7 +127,7 @@ namespace api {
                 return parsedTime.count();
             }
         }
-        throw std::runtime_error("Failed to parse only time string(" + str + ")");
+        throw std::runtime_error("Failed to parse time string(" + str + ")");
     }
 
     // 本地时区: 上海

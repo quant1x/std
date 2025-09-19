@@ -15,9 +15,14 @@ namespace api {
 
     // 获取时区偏移的毫秒数
     int64_t zone_offset_milliseconds();
-    // 解析日期
+    
+    /// 解析日期时间字符串 - 主要用于日期格式，也支持包含时间
+    /// 支持格式: "2023-05-15 14:30:00", "2023-05-15", "20230515" 等
     int64_t parse_date(const std::string &str);
-    // 解析时间
+    
+    /// 解析时间字符串 - 主要用于时间格式，但也兼容完整日期时间
+    /// 支持格式: "14:30:00"(纯时间), "2023-05-15 14:30:00"(完整), "143000" 等
+    /// 设计目的：用户关注时分秒时使用，但不限制输入格式
     int64_t parse_time(const std::string &str);
 
     int64_t ms_utc_to_local(const int64_t &milliseconds);
