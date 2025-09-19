@@ -41,3 +41,8 @@ vcpkg_installed/
 .cache/
 
 .env
+
+
+# Added by cargo
+
+target/
