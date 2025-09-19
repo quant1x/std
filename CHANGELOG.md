@@ -3,10 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.12] - 2025-09-19
+### Changed
+- 实现c++版本的exchange::timestamp类
+- 修正演示代码
+
 ## [0.0.11] - 2025-09-19
 ### Changed
 - 新增对象池的接口定义
 - 初始化rust库项目
+- update changelog
 
 ## [0.0.10] - 2025-09-19
 ### Changed
@@ -63,7 +69,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.11...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.12...HEAD
+[0.0.12]: https://gitee.com/quant1x/std.git/compare/v0.0.11...v0.0.12
 [0.0.11]: https://gitee.com/quant1x/std.git/compare/v0.0.10...v0.0.11
 [0.0.10]: https://gitee.com/quant1x/std.git/compare/v0.0.9...v0.0.10
 [0.0.9]: https://gitee.com/quant1x/std.git/compare/v0.0.8...v0.0.9
