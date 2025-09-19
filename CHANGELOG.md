@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.24] - 2025-09-20
+### Changed
+- 修正结构体map的接收器的告警
+
 ## [0.0.23] - 2025-09-20
 ### Changed
 - 删除废弃的代码
 - 新增clangd的配置文件
+- update changelog
 
 ## [0.0.22] - 2025-09-20
 ### Changed
@@ -138,7 +143,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.23...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.24...HEAD
+[0.0.24]: https://gitee.com/quant1x/std.git/compare/v0.0.23...v0.0.24
 [0.0.23]: https://gitee.com/quant1x/std.git/compare/v0.0.22...v0.0.23
 [0.0.22]: https://gitee.com/quant1x/std.git/compare/v0.0.21...v0.0.22
 [0.0.21]: https://gitee.com/quant1x/std.git/compare/v0.0.20...v0.0.21
