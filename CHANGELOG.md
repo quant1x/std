@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.18] - 2025-09-19
+### Changed
+- 简化命名空间
+
 ## [0.0.17] - 2025-09-19
 ### Changed
 - 优化rust命名空间
 - 优化cpu亲和性, 增加numa感知
+- update changelog
 
 ## [0.0.16] - 2025-09-19
 ### Changed
@@ -103,7 +108,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.17...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.18...HEAD
+[0.0.18]: https://gitee.com/quant1x/std.git/compare/v0.0.17...v0.0.18
 [0.0.17]: https://gitee.com/quant1x/std.git/compare/v0.0.16...v0.0.17
 [0.0.16]: https://gitee.com/quant1x/std.git/compare/v0.0.15...v0.0.16
 [0.0.15]: https://gitee.com/quant1x/std.git/compare/v0.0.14...v0.0.15
