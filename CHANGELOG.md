@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.15] - 2025-09-19
+### Changed
+- 修复cmake安装脚本的问题
+
 ## [0.0.14] - 2025-09-19
 ### Changed
 - 调整时间戳测试代码
 - 调整命名空间
+- update changelog
 
 ## [0.0.13] - 2025-09-19
 ### Changed
@@ -85,7 +90,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.14...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.15...HEAD
+[0.0.15]: https://gitee.com/quant1x/std.git/compare/v0.0.14...v0.0.15
 [0.0.14]: https://gitee.com/quant1x/std.git/compare/v0.0.13...v0.0.14
 [0.0.13]: https://gitee.com/quant1x/std.git/compare/v0.0.12...v0.0.13
 [0.0.12]: https://gitee.com/quant1x/std.git/compare/v0.0.11...v0.0.12
