@@ -3,9 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.25] - 2025-09-20
+### Changed
+- 调整strcase文档的文件名
+
 ## [0.0.24] - 2025-09-20
 ### Changed
 - 修正结构体map的接收器的告警
+- update changelog
 
 ## [0.0.23] - 2025-09-20
 ### Changed
@@ -143,7 +148,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.24...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.25...HEAD
+[0.0.25]: https://gitee.com/quant1x/std.git/compare/v0.0.24...v0.0.25
 [0.0.24]: https://gitee.com/quant1x/std.git/compare/v0.0.23...v0.0.24
 [0.0.23]: https://gitee.com/quant1x/std.git/compare/v0.0.22...v0.0.23
 [0.0.22]: https://gitee.com/quant1x/std.git/compare/v0.0.21...v0.0.22
