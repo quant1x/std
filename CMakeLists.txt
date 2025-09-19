@@ -421,6 +421,9 @@ target_link_libraries(quant1x-std PUBLIC
     third_libs global_compile_options
 )
 
+# 添加别名目标，允许下游用户使用 quant1x::std
+add_library(quant1x::std ALIAS quant1x-std)
+
 get_target_property(_libs quant1x-std INTERFACE_LINK_LIBRARIES)
 message(STATUS "Library 'quant1x-std' requires: ${_libs}")
 
@@ -602,28 +605,20 @@ install(TARGETS quant1x-std third_libs xtensor_optimize global_compile_options E
     INCLUDES DESTINATION include
 )
 
-# 安装主库头文件
+# 安装 src 目录中的头文件到 quant1x 目录
 install(
-    DIRECTORY quant1x-std/
-    DESTINATION include/quant1x/std
+    DIRECTORY src/
+    DESTINATION include/quant1x
     FILES_MATCHING
     PATTERN "*.h"
     PATTERN "*.hpp"
     PATTERN "*.inl"
-    PATTERN "__pycache__" EXCLUDE  # 忽略 Python 缓存目录（安全防护）
-    PATTERN ".git" EXCLUDE         # 可选：忽略 .git 目录
 )
 
 install(
     DIRECTORY ${CMAKE_BINARY_DIR}/include/private/
     DESTINATION include/quant1x/std
 )
-
-# 安装 CMake 配置文件
-install(EXPORT quant1x-std
-    FILE quant1x-std.cmake
-    NAMESPACE quant1x-std::
-    DESTINATION lib/cmake/quant1x-std)
 
 include(CMakePackageConfigHelpers)
 
@@ -636,7 +631,7 @@ write_basic_package_version_file(
 
 install(EXPORT quant1x-std
     FILE quant1x-std-targets.cmake
-    NAMESPACE quant1x-std::
+    NAMESPACE quant1x::
     DESTINATION lib/cmake/quant1x-std
 )
 
