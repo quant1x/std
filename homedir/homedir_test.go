@@ -25,12 +25,12 @@ func patchEnv(key, value string) func() {
 func BenchmarkDir(b *testing.B) {
 	// We do this for any "warmups"
 	for i := 0; i < 10; i++ {
-		Dir()
+		HomeDir()
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Dir()
+		HomeDir()
 	}
 }
 
@@ -40,7 +40,7 @@ func TestDir(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	dir, err := Dir()
+	dir, err := HomeDir()
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -52,7 +52,7 @@ func TestDir(t *testing.T) {
 	DisableCache = true
 	defer func() { DisableCache = false }()
 	defer patchEnv("HOME", "")()
-	dir, err = Dir()
+	dir, err = HomeDir()
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -105,7 +105,7 @@ func TestExpand(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		actual, err := Expand(tc.Input)
+		actual, err := ExpandUser(tc.Input)
 		if (err != nil) != tc.Err {
 			t.Fatalf("Input: %#v\n\nErr: %s", tc.Input, err)
 		}
@@ -119,7 +119,7 @@ func TestExpand(t *testing.T) {
 	defer func() { DisableCache = false }()
 	defer patchEnv("HOME", "/custom/path/")()
 	expected := filepath.Join("/", "custom", "path", "foo/bar")
-	actual, err := Expand("~/foo/bar")
+	actual, err := ExpandUser("~/foo/bar")
 
 	if err != nil {
 		t.Errorf("No error is expected, got: %v", err)

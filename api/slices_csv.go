@@ -17,7 +17,7 @@ func init() {
 
 // CsvToSlices CSV文件转struct切片
 func CsvToSlices[S ~[]E, E any](filename string, pointer *S) error {
-	filepath, err := homedir.Expand(filename)
+	filepath, err := homedir.ExpandUser(filename)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func CsvToSlices[S ~[]E, E any](filename string, pointer *S) error {
 
 // SlicesToCsv struct切片转csv文件
 func SlicesToCsv[S ~[]E, E any](filename string, s S, force ...bool) error {
-	filepath, err := homedir.Expand(filename)
+	filepath, err := homedir.ExpandUser(filename)
 	if err != nil {
 		return err
 	}

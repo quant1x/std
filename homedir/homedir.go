@@ -19,11 +19,11 @@ var DisableCache bool
 var homedirCache string
 var cacheLock sync.RWMutex
 
-// Dir returns the home directory for the executing user.
+// HomeDir returns the home directory for the executing user.
 //
 // This uses an OS-specific method for discovering the home directory.
 // An error is returned if a home directory cannot be detected.
-func Dir() (string, error) {
+func HomeDir() (string, error) {
 	if !DisableCache {
 		cacheLock.RLock()
 		cached := homedirCache
@@ -52,10 +52,10 @@ func Dir() (string, error) {
 	return result, nil
 }
 
-// Expand expands the path to include the home directory if the path
+// ExpandUser expands the path to include the home directory if the path
 // is prefixed with `~`. If it isn't prefixed with `~`, the path is
 // returned as-is.
-func Expand(path string) (string, error) {
+func ExpandUser(path string) (string, error) {
 	if len(path) == 0 {
 		return path, nil
 	}
@@ -68,7 +68,7 @@ func Expand(path string) (string, error) {
 		return "", errors.New("cannot expand user-specific home dir")
 	}
 
-	dir, err := Dir()
+	dir, err := HomeDir()
 	if err != nil {
 		return "", err
 	}
@@ -76,7 +76,7 @@ func Expand(path string) (string, error) {
 	return filepath.Join(dir, path[1:]), nil
 }
 
-// Reset clears the cache, forcing the next call to Dir to re-detect
+// Reset clears the cache, forcing the next call to HomeDir to re-detect
 // the home directory. This generally never has to be called, but can be
 // useful in tests if you're modifying the home directory via the HOME
 // env var or something.
