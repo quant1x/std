@@ -66,8 +66,8 @@ TEST_F(TimestampTest, StringFormatting) {
     std::string date_only = ts.only_date();
     EXPECT_EQ(date_only, "2022-06-15");
     
-    std::string yyyymmdd = ts.yyyymmdd();
-    EXPECT_EQ(yyyymmdd, "20220615");
+    uint32_t yyyymmdd = ts.yyyymmdd();
+    EXPECT_EQ(yyyymmdd, 20220615);
 }
 
 // Test time operations

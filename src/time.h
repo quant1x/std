@@ -35,11 +35,13 @@ namespace api {
     // diff 季度偏移数, 大于0前移diff个季度, 小于0后移diff个季度, 默认为当前季度
     std::tuple<std::string, std::string, std::string> GetQuarterByDate(const std::string& date, int diff = 0);
 
-    class Time {
+    // Time类已废弃, 自0.1.0版本起不再推荐使用. 请使用 exchange::timestamp 代替
+    class [[deprecated("Time类已废弃, 自0.1.0版本起不再推荐使用. 请使用 exchange::timestamp 代替")]] Time {
     private:
         i64 ms_; ///< 本地时间的毫秒数
     public:
         Time(): ms_(0){}
+        i64 value() const { return ms_; } // 添加getter方法使用ms_字段
 
     };
 
