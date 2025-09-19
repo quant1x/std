@@ -1,6 +1,6 @@
 //go:build !windows
 
-package runtime
+package core
 
 import (
 	"os"
