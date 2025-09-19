@@ -7,8 +7,8 @@ type Map[K any, V any] struct {
 	syncMap sync.Map
 }
 
-func (this *Map[K, V]) Get(k K) (V, bool) {
-	obj, ok := this.syncMap.Load(k)
+func (m *Map[K, V]) Get(k K) (V, bool) {
+	obj, ok := m.syncMap.Load(k)
 	var v V
 	if ok {
 		v, ok = obj.(V)
@@ -16,6 +16,6 @@ func (this *Map[K, V]) Get(k K) (V, bool) {
 	return v, ok
 }
 
-func (this *Map[K, V]) Put(k K, v V) {
-	this.syncMap.Store(k, v)
+func (m *Map[K, V]) Put(k K, v V) {
+	m.syncMap.Store(k, v)
 }
