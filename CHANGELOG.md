@@ -3,9 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.27] - 2025-09-20
+### Changed
+- 从std库删除asio的实现
+
 ## [0.0.26] - 2025-09-20
 ### Changed
 - 调整头文件安装路径
+- update changelog
 
 ## [0.0.25] - 2025-09-20
 ### Changed
@@ -153,7 +158,8 @@ All notable changes to this project will be documented in this file.
 - update changelog
 
 
-[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.26...HEAD
+[Unreleased]: https://gitee.com/quant1x/std.git/compare/v0.0.27...HEAD
+[0.0.27]: https://gitee.com/quant1x/std.git/compare/v0.0.26...v0.0.27
 [0.0.26]: https://gitee.com/quant1x/std.git/compare/v0.0.25...v0.0.26
 [0.0.25]: https://gitee.com/quant1x/std.git/compare/v0.0.24...v0.0.25
 [0.0.24]: https://gitee.com/quant1x/std.git/compare/v0.0.23...v0.0.24
