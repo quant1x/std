@@ -5,30 +5,30 @@ import (
 	"sync/atomic"
 	"time"
 
+	"gitee.com/quant1x/std/api"
 	"gitee.com/quant1x/std/logger"
 	"gitee.com/quant1x/std/runtime"
-	"gitee.com/quant1x/std/timestamp"
 )
 
 const (
 	// 滑动窗口的锚点毫秒数, 默认0
 	rollingAnchorPoint = 0
 	// 窗口相对于锚点的偏移量
-	rollingWindow = timestamp.MillisecondsPerDay
+	rollingWindow = api.MillisecondsPerDay
 	// 相对于默认, 每天9点整
-	offsetWindow = timestamp.MillisecondsPerHour * 9
+	offsetWindow = api.MillisecondsPerHour * 9
 )
 
 // 计算下一个时间窗口
 // 当前时间戳和当前观察点+偏移量比较
 // 下一个时间窗口observer+滑动窗口尺寸
 func nextTimeWindow(observer, rollingWindow int64) (next, current int64, canSwitch bool) {
-	now := timestamp.Now()
+	now := api.Now()
 	next = observer + rollingWindow
 	if now >= next {
 		canSwitch = true
 	}
-	elapsed := timestamp.SinceZero(now)
+	elapsed := api.SinceZero(now)
 	current = elapsed
 	return
 }
@@ -36,7 +36,7 @@ func nextTimeWindow(observer, rollingWindow int64) (next, current int64, canSwit
 // 获取当前观察点
 // 当日0的毫秒数zero + offsetMilliSeconds
 func getCurrentObserver(offsetMilliSeconds int64) int64 {
-	zero := timestamp.Today()
+	zero := api.Today()
 	return zero + offsetMilliSeconds
 }
 
@@ -80,8 +80,8 @@ func (o *RollingOnce) initTicker() {
 
 // SetOffsetTime 用小时数,分钟数设置滑动窗口的偏移量
 func (o *RollingOnce) SetOffsetTime(hour, minute int) {
-	offset := timestamp.MillisecondsPerHour * hour
-	offset += timestamp.MillisecondsPerMinute * minute
+	offset := api.MillisecondsPerHour * hour
+	offset += api.MillisecondsPerMinute * minute
 	o.SetOffsetForZero(int64(offset))
 }
 

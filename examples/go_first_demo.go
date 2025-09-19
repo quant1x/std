@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	"gitee.com/quant1x/std/timestamp"
+	"gitee.com/quant1x/std/api"
 )
 
 func main() {
@@ -14,10 +14,10 @@ func main() {
 	fmt.Println("\n1. C++风格API（主要接口）:")
 
 	// 使用C++风格的API作为主要接口
-	ts1 := timestamp.NowTimestamp()
+	ts1 := api.NowTimestamp()
 	fmt.Printf("当前时间戳: %s\n", ts1.String())
 
-	ts2 := timestamp.NewTimestamp(1640995200000)
+	ts2 := api.NewTimestamp(1640995200000)
 	fmt.Printf("从毫秒创建: %s\n", ts2.String())
 
 	// C++风格的比较
@@ -28,21 +28,21 @@ func main() {
 	fmt.Println("\n2. Go原生数据交互:")
 
 	// Go原生的int64时间戳
-	rawTime := timestamp.Now()
+	rawTime := api.Now()
 	fmt.Printf("Go原生时间戳: %d\n", rawTime)
-	
+
 	// C++对象与Go原生类型的双向转换
-	cppFromGo := timestamp.NewTimestamp(rawTime)
+	cppFromGo := api.NewTimestamp(rawTime)
 	goFromCpp := cppFromGo.AsTimestamp()
-	
+
 	fmt.Printf("C++对象: %s\n", cppFromGo.String())
 	fmt.Printf("转回Go: %d\n", goFromCpp)
 
 	fmt.Println("\n3. C++丰富API演示:")
-	
+
 	// 创建测试时间戳
-	testTime := timestamp.NewTimestampFromDate(2022, 6, 15, 14, 30, 45, 123)
-	
+	testTime := api.NewTimestampFromDate(2022, 6, 15, 14, 30, 45, 123)
+
 	fmt.Println("C++风格的丰富时间操作:")
 	fmt.Printf("  完整时间: %s\n", testTime.ToString())
 	fmt.Printf("  仅日期: %s\n", testTime.OnlyDate())

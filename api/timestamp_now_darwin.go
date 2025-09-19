@@ -1,6 +1,6 @@
 //go:build darwin
 
-package timestamp
+package api
 
 import (
 	_ "unsafe" // for go:linkname

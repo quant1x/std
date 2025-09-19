@@ -1,4 +1,4 @@
-package homedir
+package api
 
 import (
 	"bytes"

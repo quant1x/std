@@ -14,8 +14,8 @@ const (
 	TimeFormat = "2006-01-02 15:04:05"
 	// TimeFormat2 时间格式 yyyyMMddHHmmss
 	TimeFormat2 = "20060102150405"
-	// Timestamp 时间戳 - 毫秒 时间格式 yyyy-MM-dd HH:mm:ss.SSS
-	Timestamp = "2006-01-02 15:04:05.000"
+	// TimeStamp 时间戳 - 毫秒 时间格式 yyyy-MM-dd HH:mm:ss.SSS
+	TimeStamp = "2006-01-02 15:04:05.000"
 
 	// TimeOnly 时分秒
 	TimeOnly = time.TimeOnly

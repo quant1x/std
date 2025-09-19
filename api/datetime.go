@@ -28,8 +28,8 @@ func ParseTime(timestr string) (time.Time, error) {
 		return time.ParseInLocation(TimeFormat2, s, time.Local)
 	case len(TimeFormat):
 		return time.ParseInLocation(TimeFormat, s, time.Local)
-	case len(Timestamp):
-		return time.ParseInLocation(Timestamp, s, time.Local)
+	case len(TimeStamp):
+		return time.ParseInLocation(TimeStamp, s, time.Local)
 	default:
 		return time.Time{}, ErrDateFormat
 	}

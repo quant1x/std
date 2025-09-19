@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"gitee.com/quant1x/std/api"
 	"gitee.com/quant1x/std/concurrent"
-	"gitee.com/quant1x/std/timestamp"
 )
 
 var (
@@ -76,6 +76,6 @@ func Test_defaultTimeWindow(t *testing.T) {
 	fmt.Println(observer)
 	a, b, c := nextTimeWindow(observer, rollingWindow)
 	fmt.Println(a, b, c)
-	nt := timestamp.Time(a)
+	nt := api.Time(a)
 	fmt.Println(nt.Format(time.DateTime))
 }

@@ -3,8 +3,6 @@ package api
 import (
 	"os"
 	"path/filepath"
-
-	"gitee.com/quant1x/std/homedir"
 )
 
 const (
@@ -25,7 +23,7 @@ const (
 //
 //	检查filename 文件路径, 如果不存在就创建
 func CheckFilepath(filename string, notExistToCreate ...bool) error {
-	filename, _ = homedir.ExpandUser(filename)
+	filename, _ = ExpandUser(filename)
 	path := filepath.Dir(filename)
 	dir, err := os.Lstat(path)
 	if err == nil {

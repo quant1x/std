@@ -1,4 +1,4 @@
-package timestamp
+package api
 
 import (
 	"fmt"
