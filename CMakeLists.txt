@@ -370,6 +370,7 @@ set(std-sources
     src/simd.cpp
     src/cpu_info.cpp
     src/timestamp.cpp
+    src/affinity.cpp
 )
 
 #if (WIN32)

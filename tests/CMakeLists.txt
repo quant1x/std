@@ -95,3 +95,6 @@ macro(add_benchmark_executable source_file)
 endmacro()
 
 add_gtest_executable(test_timestamp.cpp)
+add_gtest_executable(test_numa_affinity.cpp)
+add_app_executable(numa_affinity_validator.cpp)
+add_app_executable(simple_numa_test.cpp)
